@@ -1,0 +1,1071 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Iron Wheel — spin the wheel, get your gym dare</title>
+<meta name="description" content="Iron Wheel is a free gym workout spinner. Pick a muscle group, spin the wheel, and get a real exercise with the right reps and form cues — no setup, no sign-up.">
+<meta property="og:title" content="Iron Wheel — spin the wheel, get your gym dare">
+<meta property="og:description" content="A free gym workout spinner. Pick a muscle group, spin the wheel, and get a real exercise with the right reps and form cues.">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Iron Wheel — spin the wheel, get your gym dare">
+<meta name="twitter:description" content="A free gym workout spinner. Pick a muscle group, spin, and get your dare.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #141414;
+    --surface: #1F1E1C;
+    --surface-raised: #262420;
+    --iron: #3A3733;
+    --chalk: #EDE8DD;
+    --chalk-dim: #B7B0A0;
+    --felt: #0B6E4F;
+    --gold: #C7D0D6;
+    --gold-light: #F2F7FA;
+    --silver-dark: #7C868D;
+    --red: #A11D2E;
+    --border: rgba(237,232,221,0.10);
+  }
+  *{ box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  button, .hub, .choice-btn, .nav-btn { -webkit-tap-highlight-color: transparent; outline: none; }
+  button:focus, .hub:focus { outline: none; }
+  body{
+    margin:0;
+    background: var(--bg);
+    color: var(--chalk);
+    font-family: 'Inter', sans-serif;
+    min-height:100vh;
+    padding: 24px 16px 64px;
+  }
+  .wrap{ max-width: 480px; margin: 0 auto; }
+
+  .top-row{
+    display:flex;
+    align-items:flex-start;
+    justify-content:space-between;
+    gap:12px;
+    margin-bottom: 6px;
+  }
+  .eyebrow{
+    font-size:12px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--gold);
+    font-weight:600;
+    margin: 0 0 6px;
+  }
+  h1{
+    font-family:'Anton', sans-serif;
+    font-weight:400;
+    font-size: 40px;
+    letter-spacing: 0.01em;
+    margin: 0 0 6px;
+    line-height:0.95;
+    text-transform: uppercase;
+  }
+  .tagline{
+    color: var(--chalk-dim);
+    font-size:14px;
+    margin: 0 0 20px;
+  }
+  .nav-buttons{
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+    flex-shrink:0;
+  }
+  .nav-btn{
+    font-family:'Inter',sans-serif;
+    font-size:11px;
+    font-weight:700;
+    letter-spacing:0.03em;
+    text-transform:uppercase;
+    padding: 8px 10px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--chalk-dim);
+    cursor:pointer;
+    white-space:nowrap;
+  }
+  .nav-btn:hover{ border-color: var(--gold); color: var(--gold-light); }
+  .nav-btn-wrap{ position:relative; }
+  .soon-badge{
+    position:absolute;
+    top:-8px;
+    right:-6px;
+    background: var(--red);
+    color:#fff;
+    font-size:8px;
+    font-weight:800;
+    letter-spacing:0.04em;
+    padding: 2px 5px;
+    border-radius:8px;
+    transform: rotate(8deg);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.4);
+    pointer-events:none;
+  }
+  .toast{
+    position:fixed;
+    left:50%;
+    bottom:28px;
+    transform: translateX(-50%) translateY(12px);
+    background: var(--surface-raised);
+    border: 1px solid var(--gold);
+    color: var(--chalk);
+    font-size:13px;
+    font-weight:600;
+    padding: 12px 18px;
+    border-radius:24px;
+    box-shadow: 0 10px 28px rgba(0,0,0,0.5);
+    opacity:0;
+    z-index:80;
+    transition: opacity 0.25s ease, transform 0.25s ease;
+    pointer-events:none;
+    white-space:nowrap;
+  }
+  .toast.show{ opacity:1; transform: translateX(-50%) translateY(0); }
+
+  .label{
+    font-size:11px;
+    letter-spacing:0.1em;
+    text-transform:uppercase;
+    color: var(--chalk-dim);
+    font-weight:600;
+    margin: 0 0 8px;
+  }
+  .choice-row{
+    display:grid;
+    gap:8px;
+    margin-bottom:20px;
+  }
+  .cols-3{ grid-template-columns: repeat(3, 1fr); }
+  .cols-2{ grid-template-columns: repeat(2, 1fr); }
+  .cols-5{ grid-template-columns: repeat(5, 1fr); }
+  .choice-btn{
+    font-family:'Inter',sans-serif;
+    font-size:13px;
+    font-weight:600;
+    padding: 12px 6px;
+    border-radius:8px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--chalk);
+    cursor:pointer;
+    transition: all 0.12s;
+    text-align:center;
+  }
+  .choice-btn:hover{ border-color: var(--gold); }
+  .choice-btn.selected{
+    background: var(--iron);
+    border-color: var(--gold);
+    color: var(--gold-light);
+  }
+
+  .btn-primary{
+    width:100%;
+    font-family:'Anton', sans-serif;
+    font-weight:400;
+    font-size:20px;
+    letter-spacing:0.04em;
+    text-transform:uppercase;
+    padding: 18px;
+    border-radius:12px;
+    border:none;
+    background: linear-gradient(180deg, #C0272F, #8C1520);
+    color: var(--chalk);
+    cursor:pointer;
+    margin-bottom: 10px;
+    transition: filter 0.15s, transform 0.1s;
+  }
+  .btn-primary:hover{ filter: brightness(1.1); }
+  .btn-primary:active{ transform: scale(0.98); }
+  .btn-primary:disabled{ opacity:0.45; cursor:default; }
+
+  .btn-secondary{
+    width:100%;
+    font-family:'Inter',sans-serif;
+    font-size:13px;
+    font-weight:600;
+    padding: 12px;
+    border-radius:8px;
+    border: 1px solid var(--border);
+    background:transparent;
+    color: var(--chalk-dim);
+    cursor:pointer;
+    margin-top:10px;
+  }
+  .btn-secondary:hover{ border-color: var(--gold); color: var(--gold-light); }
+
+  .exercise-row{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius:8px;
+    padding: 12px 14px;
+    margin-bottom:7px;
+    font-size:14px;
+  }
+  .exercise-row span.reps{
+    color: var(--gold-light);
+    font-size:12px;
+    font-weight:600;
+  }
+
+  /* wheel */
+  .wheel-status{
+    text-align:center;
+    font-size:12px;
+    font-weight:600;
+    letter-spacing:0.04em;
+    text-transform:uppercase;
+    color: var(--gold-light);
+    min-height:16px;
+    margin-bottom: 6px;
+  }
+  .wheel-stage{
+    position:relative;
+    width: min(96vw, 400px);
+    height: min(96vw, 400px);
+    margin: 4px auto 18px;
+    border-radius:50%;
+    background: radial-gradient(circle, rgba(180,200,215,0.20) 0%, rgba(180,200,215,0) 68%);
+  }
+  .pointer{
+    position:absolute;
+    top: -9px;
+    left:50%;
+    transform: translateX(-50%);
+    width:0; height:0;
+    border-left: 18px solid transparent;
+    border-right: 18px solid transparent;
+    border-top: 30px solid var(--gold-light);
+    z-index:5;
+    filter: drop-shadow(0 3px 4px rgba(0,0,0,0.65));
+  }
+  .hub{
+    position:absolute;
+    top:50%; left:50%;
+    width:60px; height:60px;
+    margin: -30px 0 0 -30px;
+    border-radius:50%;
+    background: radial-gradient(circle at 35% 32%, #FFFFFF, #D4DDE3 45%, #8A939B 100%);
+    border: 5px solid var(--bg);
+    z-index:4;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.55), inset 0 -3px 6px rgba(0,0,0,0.25), inset 0 2px 4px rgba(255,255,255,0.8);
+    cursor:pointer;
+  }
+  .hub-gem{
+    position:absolute;
+    top:50%; left:50%;
+    width:16px; height:16px;
+    margin: -8px 0 0 -8px;
+    background: linear-gradient(135deg, #FFFFFF, #CFE8FF);
+    transform: rotate(45deg);
+    border-radius:2px;
+    box-shadow: 0 0 10px rgba(207,232,255,0.95);
+  }
+  #wheelCanvas{
+    width:100%; height:100%;
+    display:block;
+    filter: drop-shadow(0 18px 34px rgba(0,0,0,0.65)) drop-shadow(0 3px 6px rgba(0,0,0,0.5));
+  }
+  .multiplayer-hint{
+    text-align:center;
+    color: var(--chalk-dim);
+    font-size:12px;
+    margin: -6px 0 20px;
+  }
+  .disclaimer{
+    text-align:center;
+    color: var(--chalk-dim);
+    opacity:0.55;
+    font-size:10px;
+    margin: 4px 0 0;
+  }
+  .result-overlay{
+    position:fixed;
+    inset:0;
+    background: rgba(0,0,0,0.72);
+    display:none;
+    align-items:center;
+    justify-content:center;
+    z-index:60;
+    padding: 24px 16px;
+  }
+  .result-overlay.open{ display:flex; }
+  .result-card{
+    background: var(--surface-raised);
+    border: 1px solid var(--gold);
+    border-radius:16px;
+    padding: 26px 22px;
+    text-align:center;
+    max-width: 340px;
+    width:100%;
+    box-shadow: 0 24px 60px rgba(0,0,0,0.6);
+  }
+  .result-card.show{ animation: pop 0.3s ease; }
+  @keyframes pop{
+    0%{ transform: scale(0.85); opacity:0; }
+    100%{ transform: scale(1); opacity:1; }
+  }
+  @keyframes muscleGrow{ 0%{ transform: scale(0.5); } 55%{ transform: scale(1.22); } 100%{ transform: scale(1); } }
+  .grow-part{ animation: muscleGrow 0.65s cubic-bezier(.34,1.56,.64,1) both; transform-box: fill-box; transform-origin: center; }
+  .result-name{
+    font-family:'Anton', sans-serif;
+    font-size:26px;
+    text-transform:uppercase;
+    color: var(--chalk);
+    margin: 0 0 4px;
+  }
+  .result-reps{
+    color: var(--gold-light);
+    font-weight:700;
+    font-size:15px;
+  }
+  .result-diagram{
+    margin: 0 auto 10px;
+    width: 74px;
+  }
+  .result-howto{
+    color: var(--chalk-dim);
+    font-size:13px;
+    line-height:1.5;
+    margin: 12px 0 2px;
+    text-align:left;
+    padding-top:12px;
+    border-top: 1px solid var(--border);
+  }
+  .result-howto-label{
+    color: var(--gold-light);
+    font-size:11px;
+    font-weight:700;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    margin: 12px 0 6px;
+    text-align:left;
+    display:block;
+  }
+  .result-icon{
+    width:76px;
+    margin: 0 auto 12px;
+  }
+  .result-icon svg{
+    width:100%;
+    height:auto;
+  }
+  .result-howto{
+    color: var(--chalk-dim);
+    font-size:13px;
+    line-height:1.55;
+    text-align:left;
+    margin: 12px 0 4px;
+    padding-top:12px;
+    border-top: 1px solid var(--border);
+  }
+
+  /* modal */
+  .modal-overlay{
+    position:fixed;
+    inset:0;
+    background: rgba(0,0,0,0.65);
+    display:none;
+    justify-content:center;
+    z-index:50;
+    padding: 24px 16px;
+    overflow-y:auto;
+  }
+  .modal-overlay.open{ display:flex; }
+  .modal-card{
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius:14px;
+    padding: 20px;
+    max-width: 440px;
+    width:100%;
+    margin-top: 12px;
+    height:fit-content;
+  }
+  .modal-head{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin-bottom: 16px;
+  }
+  .modal-title{
+    font-family:'Anton', sans-serif;
+    font-size:22px;
+    text-transform:uppercase;
+    margin:0;
+  }
+  .modal-close{
+    background:transparent;
+    border:1px solid var(--border);
+    color: var(--chalk-dim);
+    font-size:16px;
+    width:30px; height:30px;
+    border-radius:50%;
+    cursor:pointer;
+  }
+  .modal-close:hover{ color: var(--chalk); border-color: var(--gold); }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="top-row">
+    <div>
+      <p class="eyebrow">No excuses generator</p>
+      <h1>Iron Wheel</h1>
+    </div>
+    <div class="nav-buttons">
+      <div class="nav-btn-wrap">
+        <button class="nav-btn" id="openBuildBtn">Build workout</button>
+        <span class="soon-badge">SOON</span>
+      </div>
+      <button class="nav-btn" id="openHistoryBtn">History</button>
+    </div>
+  </div>
+  <p class="tagline">Pick a muscle, watch the wheel load, then spin for your dare.</p>
+
+  <p class="label">Muscle group</p>
+  <div class="choice-row cols-5" id="muscleRow"></div>
+
+  <p class="wheel-status" id="wheelStatus">&nbsp;</p>
+  <div class="wheel-stage">
+    <div class="pointer"></div>
+    <div class="hub" id="hubSpinBtn"><div class="hub-gem"></div></div>
+    <canvas id="wheelCanvas" width="400" height="400"></canvas>
+  </div>
+
+  <button class="btn-primary" id="spinBtn">Spin the wheel</button>
+  <p class="multiplayer-hint">Playing with mates? Pass the phone — next person spins.</p>
+  <p class="disclaimer">For guidance only — not a substitute for professional coaching.</p>
+
+</div>
+
+<div class="result-overlay" id="spinResultOverlay">
+  <div class="result-card" id="spinResultCard">
+    <button class="modal-close" id="closeResultBtn" style="float:right;">&times;</button>
+    <div class="result-icon" id="spinResultIcon">
+      <svg viewBox="0 0 64 24" xmlns="http://www.w3.org/2000/svg">
+        <rect x="26" y="8" width="12" height="8" rx="1"/>
+        <rect x="4" y="2" width="8" height="20" rx="2"/>
+        <rect x="52" y="2" width="8" height="20" rx="2"/>
+        <rect x="14" y="6" width="4" height="12" rx="1"/>
+        <rect x="46" y="6" width="4" height="12" rx="1"/>
+      </svg>
+    </div>
+    <p class="result-name" id="spinResultName"></p>
+    <p class="result-reps" id="spinResultReps"></p>
+    <p class="result-howto" id="spinResultHowTo"></p>
+    <button class="btn-secondary" id="logSpinBtn">Log it</button>
+  </div>
+</div>
+
+<!-- BUILD WORKOUT MODAL -->
+<div class="modal-overlay" id="buildModal">
+  <div class="modal-card">
+    <div class="modal-head">
+      <p class="modal-title">Build workout</p>
+      <button class="modal-close" id="closeBuildBtn">&times;</button>
+    </div>
+
+    <p class="label">Day type</p>
+    <div class="choice-row cols-3" id="dayTypeRow"></div>
+
+    <p class="label">Equipment</p>
+    <div class="choice-row cols-2" id="equipmentRow"></div>
+
+    <p class="label">Time available</p>
+    <div class="choice-row cols-3" id="timeRow"></div>
+
+    <button class="btn-primary" id="generateBtn">Generate workout</button>
+
+    <div id="generateResultBlock" style="display:none;">
+      <p class="label" id="generateResultLabel">Your workout</p>
+      <div id="generateResultList"></div>
+      <button class="btn-secondary" id="regenerateBtn">Regenerate</button>
+      <button class="btn-secondary" id="logGenerateBtn">Log this workout</button>
+    </div>
+  </div>
+</div>
+
+<!-- HISTORY MODAL -->
+<div class="modal-overlay" id="historyModal">
+  <div class="modal-card">
+    <div class="modal-head">
+      <p class="modal-title">Your log</p>
+      <button class="modal-close" id="closeHistoryBtn">&times;</button>
+    </div>
+    <p style="color:var(--chalk-dim); font-size:12px; margin:0 0 16px;">
+      Saved in this browser. It'll stick around once you host this as a real page — inside this in-chat preview it may not carry over between visits.
+    </p>
+    <div id="historyList"></div>
+    <p id="historyEmpty" style="color:var(--chalk-dim); font-size:13px; display:none;">Nothing logged yet. Spin the wheel or build a workout, then log it.</p>
+    <button class="btn-secondary" id="clearHistoryBtn">Clear history</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ---------- data ----------
+// reps = the single best rep target for this exercise when it comes up on the wheel
+const EXERCISES = [
+  {name:"Chest press machine", day:"push", muscle:"chest", equip:"machine", reps:"10 reps", howTo:"Set the seat so handles align with mid-chest. Press forward until arms are extended, then control the return."},
+  {name:"Pec deck fly", day:"push", muscle:"chest", equip:"machine", reps:"15 reps", howTo:"Sit tall, forearms on the pads. Squeeze your arms together in an arc, then release slowly."},
+  {name:"Incline chest press machine", day:"push", muscle:"chest", equip:"machine", reps:"10 reps", howTo:"Set the seat so handles sit at the top of your chest. Press up and slightly forward, squeeze at the top."},
+  {name:"Cable crossover", day:"push", muscle:"chest", equip:"machine", reps:"15 reps", howTo:"Set both pulleys high and step forward. Pull the handles down and together in front of your hips."},
+  {name:"Standing cable fly", day:"push", muscle:"chest", equip:"machine", reps:"15 reps", howTo:"Set pulleys at chest height. Bring the handles together in front of you with a slight elbow bend."},
+  {name:"Dumbbell bench press", day:"push", muscle:"chest", equip:"free", reps:"8 reps", howTo:"Lie flat, dumbbells above your chest. Lower under control to chest level, then press back up."},
+  {name:"Cable chest press", day:"push", muscle:"chest", equip:"machine", reps:"12 reps", howTo:"Set pulleys at chest height, step into a staggered stance. Press the handles forward and together."},
+  {name:"Incline dumbbell press", day:"push", muscle:"chest", equip:"free", reps:"10 reps", howTo:"On an incline bench, press the dumbbells up and slightly inward until arms are extended."},
+  {name:"Shoulder press machine", day:"push", muscle:"shoulders", equip:"machine", reps:"10 reps", howTo:"Set the seat so handles start at shoulder height. Press straight up without locking out hard."},
+  {name:"Cable lateral raise", day:"push", muscle:"shoulders", equip:"machine", reps:"15 reps", howTo:"Pulley at the lowest setting, stand side-on. Raise the handle out to shoulder height, leading with your elbow."},
+  {name:"Cable front raise", day:"push", muscle:"shoulders", equip:"machine", reps:"15 reps", howTo:"Pulley low, handle in front of you. Raise straight out to shoulder height, then control the descent."},
+  {name:"Dumbbell lateral raise", day:"push", muscle:"shoulders", equip:"free", reps:"15 reps", howTo:"Stand tall with a slight bend in the elbows. Raise the dumbbells out to the sides to shoulder height."},
+  {name:"Machine shoulder press", day:"push", muscle:"shoulders", equip:"machine", reps:"10 reps", howTo:"Set seat height so handles are level with your shoulders. Press up without flaring your lower back."},
+  {name:"Dumbbell overhead press", day:"push", muscle:"shoulders", equip:"free", reps:"8 reps", howTo:"Stand or sit with dumbbells at shoulder height. Press straight overhead until arms are extended."},
+  {name:"Triceps pushdown", day:"push", muscle:"arms", equip:"machine", reps:"12 reps", howTo:"Elbows pinned to your sides. Push the bar or rope down until arms are straight, control the return."},
+  {name:"Overhead cable triceps extension", day:"push", muscle:"arms", equip:"machine", reps:"12 reps", howTo:"Face away from the pulley, rope overhead. Extend forward and up without flaring your elbows."},
+  {name:"Dumbbell skull crusher", day:"push", muscle:"arms", equip:"free", reps:"10 reps", howTo:"Lying down, dumbbells above your forehead. Bend at the elbow only, lower toward your head, then extend."},
+  {name:"Cable triceps kickback", day:"push", muscle:"arms", equip:"machine", reps:"15 reps", howTo:"Hinge forward slightly, elbow pinned high. Extend your arm straight back, squeeze at the top."},
+  {name:"Close-grip cable press", day:"push", muscle:"arms", equip:"machine", reps:"10 reps", howTo:"Hands close together on the handle. Press forward keeping your elbows tucked in."},
+  {name:"Lat pulldown", day:"pull", muscle:"back", equip:"machine", reps:"10 reps", howTo:"Grip slightly wider than shoulders. Pull the bar to your upper chest, leading with your elbows."},
+  {name:"Seated cable row", day:"pull", muscle:"back", equip:"machine", reps:"10 reps", howTo:"Sit tall with a slight lean back at the top. Pull the handle to your torso, squeeze your shoulder blades."},
+  {name:"Assisted pull-up machine", day:"pull", muscle:"back", equip:"machine", reps:"8 reps", howTo:"Set the assistance weight. Pull your chin above the bar, then control the lowering phase."},
+  {name:"Single-arm cable row", day:"pull", muscle:"back", equip:"machine", reps:"12 reps", howTo:"Stand side-on and brace your core. Pull the handle to your ribs, keeping your torso still."},
+  {name:"Straight-arm pulldown", day:"pull", muscle:"back", equip:"machine", reps:"15 reps", howTo:"Arms straight with a slight bend at the elbows. Pull the bar down to your thighs using your lats."},
+  {name:"Chest-supported row machine", day:"pull", muscle:"back", equip:"machine", reps:"10 reps", howTo:"Chest against the pad. Row the handles back, squeezing your shoulder blades together."},
+  {name:"Wide-grip lat pulldown", day:"pull", muscle:"back", equip:"machine", reps:"10 reps", howTo:"Wide overhand grip. Pull the bar down to your chest, leading with your elbows."},
+  {name:"T-bar row machine", day:"pull", muscle:"back", equip:"machine", reps:"8 reps", howTo:"Hinge at the hips, chest up. Row the handle to your torso, squeeze at the top."},
+  {name:"Dumbbell row", day:"pull", muscle:"back", equip:"free", reps:"10 reps", howTo:"One hand and knee on a bench. Row the dumbbell to your hip, keeping your back flat."},
+  {name:"Face pull", day:"pull", muscle:"shoulders", equip:"machine", reps:"15 reps", howTo:"Pulley at head height. Pull the rope toward your face, elbows high, squeezing your shoulder blades together."},
+  {name:"Rear delt fly machine", day:"pull", muscle:"shoulders", equip:"machine", reps:"15 reps", howTo:"Sit facing the pad, arms out. Pull the handles back and out until level with your body."},
+  {name:"Cable rear delt fly", day:"pull", muscle:"shoulders", equip:"machine", reps:"15 reps", howTo:"Cross the cables in front of you. Pull each handle out and back in an arc, squeezing your rear shoulders."},
+  {name:"Reverse pec deck", day:"pull", muscle:"shoulders", equip:"machine", reps:"15 reps", howTo:"Face into the machine, grip the handles. Pull your arms back and out, squeezing your shoulder blades."},
+  {name:"Cable bicep curl", day:"pull", muscle:"arms", equip:"machine", reps:"12 reps", howTo:"Stand tall, elbows at your sides. Curl the handle up without swinging your body."},
+  {name:"Preacher curl machine", day:"pull", muscle:"arms", equip:"machine", reps:"10 reps", howTo:"Arms flat on the pad. Curl up fully, then lower slowly without locking out at the bottom."},
+  {name:"Dumbbell bicep curl", day:"pull", muscle:"arms", equip:"free", reps:"10 reps", howTo:"Stand tall, elbows tucked in. Curl the dumbbells up, squeeze at the top, lower under control."},
+  {name:"Hammer curl", day:"pull", muscle:"arms", equip:"free", reps:"10 reps", howTo:"Palms facing each other. Curl the dumbbells up keeping your wrists neutral throughout."},
+  {name:"Cable rope hammer curl", day:"pull", muscle:"arms", equip:"machine", reps:"12 reps", howTo:"Neutral grip on the rope. Curl up keeping your elbows fixed at your sides."},
+  {name:"Leg press", day:"legs", muscle:"legs", equip:"machine", reps:"10 reps", howTo:"Feet shoulder-width on the platform. Lower until knees hit about 90°, press back up without locking out."},
+  {name:"Leg extension", day:"legs", muscle:"legs", equip:"machine", reps:"15 reps", howTo:"Sit tall with the pad on your shins. Extend your legs fully, pause briefly, lower under control."},
+  {name:"Leg curl machine", day:"legs", muscle:"legs", equip:"machine", reps:"12 reps", howTo:"Lie or sit with the pad on your ankles. Curl your heels toward your glutes, control the return."},
+  {name:"Hack squat machine", day:"legs", muscle:"legs", equip:"machine", reps:"8 reps", howTo:"Shoulders under the pads, feet shoulder-width. Lower until knees hit 90°, drive back up through your heels."},
+  {name:"Calf raise machine", day:"legs", muscle:"legs", equip:"machine", reps:"15 reps", howTo:"Balls of your feet on the platform. Rise onto your toes, pause, then lower slowly for a full stretch."},
+  {name:"Hip abductor machine", day:"legs", muscle:"legs", equip:"machine", reps:"15 reps", howTo:"Sit with pads on the outside of your knees. Push your knees outward against the resistance."},
+  {name:"Hip adductor machine", day:"legs", muscle:"legs", equip:"machine", reps:"15 reps", howTo:"Sit with pads on the inside of your knees. Squeeze your knees together against the resistance."},
+  {name:"Cable pull-through", day:"legs", muscle:"legs", equip:"machine", reps:"12 reps", howTo:"Face away from the low pulley and hinge at the hips. Drive your hips forward to standing."},
+  {name:"Walking lunges", day:"legs", muscle:"legs", equip:"free", reps:"10 reps each leg", howTo:"Step forward into a lunge, back knee toward the floor. Push through your front heel to the next step."},
+  {name:"Dumbbell Romanian deadlift", day:"legs", muscle:"legs", equip:"free", reps:"8 reps", howTo:"Soft knees, hinge at the hips. Lower the dumbbells along your legs until you feel a hamstring stretch, then stand."},
+  {name:"Smith machine squat", day:"legs", muscle:"legs", equip:"machine", reps:"8 reps", howTo:"Bar on your upper back, feet slightly forward. Squat down to about 90°, then drive back up."},
+  {name:"Seated calf raise machine", day:"legs", muscle:"legs", equip:"machine", reps:"15 reps", howTo:"Pad on your knees, balls of your feet on the platform. Rise onto your toes, then lower for a full stretch."},
+  {name:"Glute kickback machine", day:"legs", muscle:"legs", equip:"machine", reps:"15 reps", howTo:"Foot on the pad, torso braced. Kick back and up, squeezing your glute at the top."},
+  {name:"Bulgarian split squat", day:"legs", muscle:"legs", equip:"free", reps:"10 reps each leg", howTo:"Rear foot elevated behind you. Lower until your front thigh is parallel to the floor, drive back up."},
+  {name:"Goblet squat", day:"legs", muscle:"legs", equip:"free", reps:"10 reps", howTo:"Hold a dumbbell at your chest. Squat down between your knees, chest up, then stand."},
+];
+
+function shuffle(arr){
+  const a = arr.slice();
+  for(let i = a.length - 1; i > 0; i--){
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function buildChoiceButtons(container, options, currentValueGetter, onSelect){
+  container.innerHTML = "";
+  options.forEach(opt => {
+    const btn = document.createElement("button");
+    btn.className = "choice-btn";
+    btn.textContent = opt.label;
+    if(opt.value === currentValueGetter()) btn.classList.add("selected");
+    btn.addEventListener("click", () => {
+      onSelect(opt.value);
+      [...container.children].forEach(c => c.classList.remove("selected"));
+      btn.classList.add("selected");
+    });
+    container.appendChild(btn);
+  });
+}
+
+// ---------- generator ----------
+let dayType = "push";
+let equipment = "machine";
+let timeMins = 45;
+const TIME_TO_COUNT = { 30: 4, 45: 5, 60: 6 };
+
+buildChoiceButtons(document.getElementById("dayTypeRow"),
+  [{label:"Push", value:"push"},{label:"Pull", value:"pull"},{label:"Legs", value:"legs"}],
+  () => dayType, v => dayType = v);
+
+buildChoiceButtons(document.getElementById("equipmentRow"),
+  [{label:"Machines & cables", value:"machine"},{label:"Free weights", value:"free"}],
+  () => equipment, v => equipment = v);
+
+buildChoiceButtons(document.getElementById("timeRow"),
+  [{label:"30 min", value:30},{label:"45 min", value:45},{label:"60 min", value:60}],
+  () => timeMins, v => timeMins = v);
+
+function generateWorkout(){
+  const count = TIME_TO_COUNT[timeMins];
+  let pool = EXERCISES.filter(e => e.day === dayType && e.equip === equipment);
+  if(pool.length < count){
+    pool = EXERCISES.filter(e => e.day === dayType);
+  }
+  const picked = shuffle(pool).slice(0, count);
+  const list = document.getElementById("generateResultList");
+  list.innerHTML = "";
+  picked.forEach(ex => {
+    const row = document.createElement("div");
+    row.className = "exercise-row";
+    row.innerHTML = `<span>${ex.name}</span><span class="reps">3 x ${ex.reps}</span>`;
+    list.appendChild(row);
+  });
+  document.getElementById("generateResultLabel").textContent = `Today's ${dayType} day`;
+  document.getElementById("generateResultBlock").style.display = "block";
+}
+
+document.getElementById("generateBtn").addEventListener("click", generateWorkout);
+document.getElementById("regenerateBtn").addEventListener("click", generateWorkout);
+
+// ---------- modals ----------
+function openModal(id){ document.getElementById(id).classList.add("open"); }
+function closeModal(id){ document.getElementById(id).classList.remove("open"); }
+let toastTimer = null;
+function showToast(msg){
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove("show"), 1800);
+}
+document.getElementById("openBuildBtn").addEventListener("click", () => showToast("Build workout — coming soon 👀"));
+document.getElementById("closeBuildBtn").addEventListener("click", () => closeModal("buildModal"));
+document.getElementById("openHistoryBtn").addEventListener("click", () => { renderHistory(); openModal("historyModal"); });
+document.getElementById("closeHistoryBtn").addEventListener("click", () => closeModal("historyModal"));
+document.getElementById("closeResultBtn").addEventListener("click", () => closeModal("spinResultOverlay"));
+[document.getElementById("buildModal"), document.getElementById("historyModal"), document.getElementById("spinResultOverlay")].forEach(overlay => {
+  overlay.addEventListener("click", e => { if(e.target === overlay) overlay.classList.remove("open"); });
+});
+
+// ---------- spin wheel ----------
+let muscleGroup = "chest";
+let currentWheelItems = [];
+let currentRotation = 0;
+let spinning = false;
+let filling = false;
+
+const MUSCLE_OPTIONS = [
+  {label:"Chest", value:"chest"},
+  {label:"Back", value:"back"},
+  {label:"Shoulders", value:"shoulders"},
+  {label:"Arms", value:"arms"},
+  {label:"Legs", value:"legs"},
+];
+
+buildChoiceButtons(document.getElementById("muscleRow"), MUSCLE_OPTIONS, () => muscleGroup, v => {
+  muscleGroup = v;
+  document.getElementById("spinResultOverlay").classList.remove("open");
+  fillWheel();
+});
+
+const canvas = document.getElementById("wheelCanvas");
+const ctx = canvas.getContext("2d");
+const DPR = Math.min(window.devicePixelRatio || 1, 3);
+canvas.width = 400 * DPR;
+canvas.height = 400 * DPR;
+ctx.scale(DPR, DPR);
+
+const COLOR_A = "#141414";  // deep black
+const COLOR_B = "#D7DEE3";  // diamond silver
+const TEXT_ON_A = "#F2F5F7";
+const TEXT_ON_B = "#141414";
+
+function wrapText(text, maxChars){
+  const words = text.split(" ");
+  const lines = [];
+  let line = "";
+  words.forEach(w => {
+    const test = line ? line + " " + w : w;
+    if(test.length > maxChars && line){
+      lines.push(line);
+      line = w;
+    } else {
+      line = test;
+    }
+  });
+  if(line) lines.push(line);
+  return lines.slice(0, 2);
+}
+
+function addSheen(cx, cy, r){
+  const grad = ctx.createRadialGradient(cx - r * 0.38, cy - r * 0.42, r * 0.03, cx, cy, r * 1.08);
+  grad.addColorStop(0, "rgba(255,255,255,0.55)");
+  grad.addColorStop(0.35, "rgba(255,255,255,0.10)");
+  grad.addColorStop(0.75, "rgba(0,0,0,0.10)");
+  grad.addColorStop(1, "rgba(0,0,0,0.45)");
+  ctx.save();
+  ctx.globalCompositeOperation = "overlay";
+  ctx.beginPath();
+  ctx.arc(cx, cy, r, 0, Math.PI * 2);
+  ctx.fillStyle = grad;
+  ctx.fill();
+  ctx.restore();
+}
+
+function drawBevelRing(cx, cy, r){
+  // raised metallic rim: bright highlight top-left fading to shadow bottom-right
+  const ringGrad = ctx.createLinearGradient(cx - r, cy - r, cx + r, cy + r);
+  ringGrad.addColorStop(0, "#FFFFFF");
+  ringGrad.addColorStop(0.5, "#B7C1C7");
+  ringGrad.addColorStop(1, "#4B5257");
+  ctx.beginPath();
+  ctx.arc(cx, cy, r, 0, Math.PI * 2);
+  ctx.lineWidth = 8;
+  ctx.strokeStyle = ringGrad;
+  ctx.stroke();
+
+  // inner dished shadow just inside the segments for depth
+  ctx.beginPath();
+  ctx.arc(cx, cy, r - 6, 0, Math.PI * 2);
+  ctx.lineWidth = 3;
+  ctx.strokeStyle = "rgba(0,0,0,0.35)";
+  ctx.stroke();
+}
+
+function drawWheel(){
+  const n = currentWheelItems.length;
+  if(n === 0) return;
+  const cx = 200, cy = 200, r = 188;
+  const segAngle = (2 * Math.PI) / n;
+  ctx.clearRect(0, 0, 400, 400);
+
+  currentWheelItems.forEach((item, i) => {
+    const start = -Math.PI / 2 + i * segAngle;
+    const end = start + segAngle;
+    const segGrad = ctx.createRadialGradient(cx, cy, r * 0.1, cx, cy, r);
+    if(i % 2 === 0){
+      segGrad.addColorStop(0, "#2B2B2B");
+      segGrad.addColorStop(1, "#0A0A0A");
+    } else {
+      segGrad.addColorStop(0, "#F5F8FA");
+      segGrad.addColorStop(1, "#B4BEC5");
+    }
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.arc(cx, cy, r, start, end);
+    ctx.closePath();
+    ctx.fillStyle = segGrad;
+    ctx.fill();
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = "#9AA5AC";
+    ctx.stroke();
+
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.rotate(start + segAngle / 2);
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillStyle = i % 2 === 0 ? TEXT_ON_A : TEXT_ON_B;
+    ctx.font = "400 19px Anton, sans-serif";
+    const lines = wrapText(item.name.toUpperCase(), 14);
+    const textRadius = r * 0.62;
+    lines.forEach((line, li) => {
+      const yOff = (li - (lines.length - 1) / 2) * 21;
+      ctx.fillText(line, textRadius, yOff);
+    });
+    ctx.restore();
+  });
+
+  addSheen(cx, cy, r);
+  drawBevelRing(cx, cy, r);
+}
+
+function fillWheel(){
+  const pool = EXERCISES.filter(e => e.muscle === muscleGroup);
+  filling = true;
+  document.getElementById("spinBtn").disabled = true;
+  document.getElementById("wheelStatus").textContent = "Filling wheel…";
+
+  canvas.style.transition = "none";
+  canvas.style.transform = "rotate(0deg)";
+  currentRotation = 0;
+
+  let cycles = 0;
+  const maxCycles = 6;
+  const interval = setInterval(() => {
+    currentWheelItems = shuffle(pool).slice(0, 6);
+    drawWheel();
+    playShuffleBlip();
+    cycles++;
+    if(cycles >= maxCycles){
+      clearInterval(interval);
+      filling = false;
+      document.getElementById("spinBtn").disabled = false;
+      document.getElementById("wheelStatus").textContent = "Ready — spin for your dare";
+    }
+  }, 160);
+}
+
+// ---------- sound ----------
+let audioCtx = null;
+function getAudioCtx(){
+  if(!audioCtx){
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  }
+  if(audioCtx.state === "suspended") audioCtx.resume();
+  return audioCtx;
+}
+function playTick(){
+  const ac = getAudioCtx();
+  const osc = ac.createOscillator();
+  const gain = ac.createGain();
+  osc.type = "square";
+  osc.frequency.value = 850;
+  gain.gain.setValueAtTime(0.10, ac.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.001, ac.currentTime + 0.045);
+  osc.connect(gain);
+  gain.connect(ac.destination);
+  osc.start();
+  osc.stop(ac.currentTime + 0.05);
+}
+function playShuffleBlip(){
+  const ac = getAudioCtx();
+  const osc = ac.createOscillator();
+  const gain = ac.createGain();
+  osc.type = "sine";
+  osc.frequency.setValueAtTime(520, ac.currentTime);
+  osc.frequency.exponentialRampToValueAtTime(700, ac.currentTime + 0.06);
+  gain.gain.setValueAtTime(0.06, ac.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.001, ac.currentTime + 0.08);
+  osc.connect(gain);
+  gain.connect(ac.destination);
+  osc.start();
+  osc.stop(ac.currentTime + 0.09);
+}
+function playLaunch(){
+  const ac = getAudioCtx();
+  const osc = ac.createOscillator();
+  const noiseGain = ac.createGain();
+  osc.type = "sawtooth";
+  osc.frequency.setValueAtTime(160, ac.currentTime);
+  osc.frequency.exponentialRampToValueAtTime(680, ac.currentTime + 0.22);
+  noiseGain.gain.setValueAtTime(0.0001, ac.currentTime);
+  noiseGain.gain.exponentialRampToValueAtTime(0.14, ac.currentTime + 0.08);
+  noiseGain.gain.exponentialRampToValueAtTime(0.0001, ac.currentTime + 0.26);
+  osc.connect(noiseGain);
+  noiseGain.connect(ac.destination);
+  osc.start();
+  osc.stop(ac.currentTime + 0.28);
+}
+function playLanding(){
+  const ac = getAudioCtx();
+  const now = ac.currentTime;
+  const freqs = [523.25, 659.25, 783.99];
+  freqs.forEach((f, i) => {
+    const osc = ac.createOscillator();
+    const gain = ac.createGain();
+    osc.type = "triangle";
+    osc.frequency.value = f;
+    const start = now + i * 0.09;
+    gain.gain.setValueAtTime(0.0001, start);
+    gain.gain.exponentialRampToValueAtTime(0.18, start + 0.02);
+    gain.gain.exponentialRampToValueAtTime(0.0001, start + 0.45);
+    osc.connect(gain);
+    gain.connect(ac.destination);
+    osc.start(start);
+    osc.stop(start + 0.46);
+  });
+}
+
+function easeInOutQuint(t){
+  return t < 0.5 ? 16 * t * t * t * t * t : 1 - Math.pow(-2 * t + 2, 5) / 2;
+}
+
+// fast wind-up for the first 35% of the spin, then a long, gradually
+// slowing tail across the remaining 65% for extra suspense at the end
+function spinEase(t){
+  const T1 = 0.35, P1 = 0.72;
+  if(t < T1){
+    const p = t / T1;
+    return P1 * p * p; // ease-in: keeps accelerating right up to the handoff, no dead stop
+  }
+  const t2 = (t - T1) / (1 - T1);
+  return P1 + (1 - P1) * (1 - Math.pow(1 - t2, 5));
+}
+
+function muscleDiagramSVG(muscle){
+  const hi = "#C7D0D6";
+  const dim = "#5b564c";
+  const chestOn = muscle === "chest";
+  const backOn = muscle === "back";
+  const shouldersOn = muscle === "shoulders";
+  const armsOn = muscle === "arms";
+  const legsOn = muscle === "legs";
+
+  const torsoClass = (chestOn || backOn) ? "grow-part" : "";
+  const shoulderClass = shouldersOn ? "grow-part" : "";
+  const armClass = armsOn ? "grow-part" : "";
+  const legClass = legsOn ? "grow-part" : "";
+
+  const torsoFill = (chestOn || backOn) ? hi : "none";
+  const torsoOpacity = (chestOn || backOn) ? "0.85" : "0";
+
+  return `<svg viewBox="0 0 60 100" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="30" cy="10" r="7" fill="none" stroke="${dim}" stroke-width="2"/>
+    <line x1="30" y1="17" x2="30" y2="22" stroke="${dim}" stroke-width="2"/>
+    <g class="${torsoClass}">
+      <path d="M20 22 L40 22 L37 52 L23 52 Z" fill="${torsoFill}" fill-opacity="${torsoOpacity}" stroke="${dim}" stroke-width="2"/>
+    </g>
+    <g class="${shoulderClass}">
+      <circle cx="20" cy="23" r="3" fill="${shouldersOn ? hi : "none"}" stroke="${dim}" stroke-width="2"/>
+      <circle cx="40" cy="23" r="3" fill="${shouldersOn ? hi : "none"}" stroke="${dim}" stroke-width="2"/>
+    </g>
+    <g class="${armClass}">
+      <line x1="20" y1="23" x2="11" y2="38" stroke="${armsOn ? hi : dim}" stroke-width="${armsOn ? 5 : 2}" stroke-linecap="round"/>
+      <line x1="11" y1="38" x2="9" y2="54" stroke="${armsOn ? hi : dim}" stroke-width="${armsOn ? 5 : 2}" stroke-linecap="round"/>
+      <circle cx="11" cy="38" r="2" fill="${armsOn ? hi : dim}"/>
+      <line x1="40" y1="23" x2="49" y2="38" stroke="${armsOn ? hi : dim}" stroke-width="${armsOn ? 5 : 2}" stroke-linecap="round"/>
+      <line x1="49" y1="38" x2="51" y2="54" stroke="${armsOn ? hi : dim}" stroke-width="${armsOn ? 5 : 2}" stroke-linecap="round"/>
+      <circle cx="49" cy="38" r="2" fill="${armsOn ? hi : dim}"/>
+    </g>
+    <g class="${legClass}">
+      <line x1="24" y1="52" x2="22" y2="72" stroke="${legsOn ? hi : dim}" stroke-width="${legsOn ? 6 : 2}" stroke-linecap="round"/>
+      <line x1="22" y1="72" x2="20" y2="95" stroke="${legsOn ? hi : dim}" stroke-width="${legsOn ? 6 : 2}" stroke-linecap="round"/>
+      <line x1="36" y1="52" x2="38" y2="72" stroke="${legsOn ? hi : dim}" stroke-width="${legsOn ? 6 : 2}" stroke-linecap="round"/>
+      <line x1="38" y1="72" x2="40" y2="95" stroke="${legsOn ? hi : dim}" stroke-width="${legsOn ? 6 : 2}" stroke-linecap="round"/>
+      <circle cx="22" cy="72" r="2" fill="${legsOn ? hi : dim}"/>
+      <circle cx="38" cy="72" r="2" fill="${legsOn ? hi : dim}"/>
+    </g>
+  </svg>`;
+}
+
+function spinWheel(){
+  if(spinning || filling || currentWheelItems.length === 0) return;
+  spinning = true;
+  document.getElementById("spinBtn").disabled = true;
+  document.getElementById("wheelStatus").textContent = "Spinning…";
+  getAudioCtx();
+  playLaunch();
+
+  const n = currentWheelItems.length;
+  const segAngle = 360 / n;
+  const chosenIndex = Math.floor(Math.random() * n);
+  const targetCenter = chosenIndex * segAngle + segAngle / 2;
+  const desiredMod = (360 - targetCenter + 360) % 360;
+  const jitter = (Math.random() * 0.6 - 0.3) * segAngle;
+  const fullSpins = 9 * 360;
+  const baseline = currentRotation - (currentRotation % 360);
+  const startRotation = currentRotation;
+  const targetRotation = baseline + fullSpins + desiredMod + jitter;
+  const duration = 7800;
+  const startTime = performance.now();
+  let lastBoundary = Math.floor(startRotation / segAngle);
+
+  document.getElementById("spinResultOverlay").classList.remove("open");
+  canvas.style.transition = "none";
+
+  function frame(now){
+    const elapsed = now - startTime;
+    const t = Math.min(elapsed / duration, 1);
+    const eased = spinEase(t);
+    const rotation = startRotation + (targetRotation - startRotation) * eased;
+    canvas.style.transform = `rotate(${rotation}deg)`;
+
+    const boundary = Math.floor(rotation / segAngle);
+    if(boundary !== lastBoundary){
+      playTick();
+      lastBoundary = boundary;
+    }
+
+    if(t < 1){
+      requestAnimationFrame(frame);
+    } else {
+      currentRotation = targetRotation;
+      spinning = false;
+      document.getElementById("spinBtn").disabled = false;
+      document.getElementById("wheelStatus").textContent = "Ready — spin again";
+      const chosen = currentWheelItems[chosenIndex];
+      document.getElementById("spinResultName").textContent = chosen.name;
+      document.getElementById("spinResultReps").textContent = chosen.reps;
+      document.getElementById("spinResultHowTo").textContent = chosen.howTo;
+      document.getElementById("spinResultIcon").innerHTML = muscleDiagramSVG(chosen.muscle);
+      document.getElementById("spinResultOverlay").classList.add("open");
+      document.getElementById("spinResultCard").classList.add("show");
+      playLanding();
+    }
+  }
+  requestAnimationFrame(frame);
+}
+
+document.getElementById("spinBtn").addEventListener("click", spinWheel);
+document.getElementById("hubSpinBtn").addEventListener("click", spinWheel);
+
+// ---------- history ----------
+const HISTORY_KEY = "ironWheelHistory";
+
+function loadHistory(){
+  try{
+    const raw = localStorage.getItem(HISTORY_KEY);
+    return raw ? JSON.parse(raw) : [];
+  }catch(e){
+    return [];
+  }
+}
+function saveHistory(list){
+  try{ localStorage.setItem(HISTORY_KEY, JSON.stringify(list)); }catch(e){}
+}
+function addHistoryEntry(entry){
+  const list = loadHistory();
+  list.unshift({ ...entry, date: new Date().toLocaleDateString(undefined, { day:"numeric", month:"short" }) });
+  saveHistory(list.slice(0, 50));
+}
+function renderHistory(){
+  const list = loadHistory();
+  const container = document.getElementById("historyList");
+  const empty = document.getElementById("historyEmpty");
+  container.innerHTML = "";
+  if(list.length === 0){ empty.style.display = "block"; return; }
+  empty.style.display = "none";
+  list.forEach(entry => {
+    const row = document.createElement("div");
+    row.className = "exercise-row";
+    row.innerHTML = `<span>${entry.summary}</span><span class="reps">${entry.date}</span>`;
+    container.appendChild(row);
+  });
+}
+
+document.getElementById("logGenerateBtn").addEventListener("click", () => {
+  const items = [...document.getElementById("generateResultList").children].map(el => el.firstChild.textContent);
+  addHistoryEntry({ summary: `${dayType.charAt(0).toUpperCase()+dayType.slice(1)} day — ${items.join(", ")}` });
+  document.getElementById("logGenerateBtn").textContent = "Logged ✓";
+  setTimeout(() => { document.getElementById("logGenerateBtn").textContent = "Log this workout"; }, 1500);
+});
+
+document.getElementById("logSpinBtn").addEventListener("click", () => {
+  const name = document.getElementById("spinResultName").textContent;
+  const reps = document.getElementById("spinResultReps").textContent;
+  addHistoryEntry({ summary: `Spin dare — ${name} (${reps})` });
+  document.getElementById("logSpinBtn").textContent = "Logged ✓";
+  setTimeout(() => { document.getElementById("logSpinBtn").textContent = "Log it"; }, 1500);
+});
+
+document.getElementById("clearHistoryBtn").addEventListener("click", () => {
+  saveHistory([]);
+  renderHistory();
+});
+
+// init
+fillWheel();
+</script>
+</body>
+</html>
